@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -13,6 +14,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.roomorama.caldroid.CaldroidFragment;
+import com.roomorama.caldroid.CaldroidListener;
+
+import java.util.Calendar;
+import java.util.Date;
 
 
 public class MainActivity extends ActionBarActivity
@@ -53,9 +61,29 @@ public class MainActivity extends ActionBarActivity
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        switch (position) {
+            case 1:
+                CaldroidFragment caldroidFragment = new CaldroidFragment();
+                Bundle args = new Bundle();
+                Calendar cal = Calendar.getInstance();
+                args.putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1);
+                args.putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR));
+                caldroidFragment.setArguments(args);
+                caldroidFragment.setCaldroidListener(new CaldroidListener() {
+                    @Override
+                    public void onSelectDate(Date date, View view) {
+                        Toast.makeText(getApplicationContext(), date.toString(), Toast.LENGTH_SHORT)
+                                .show();
+                    }
+                });
+                ft.replace(R.id.container, caldroidFragment);
+                break;
+            default:
+                ft.replace(R.id.container, PlaceholderFragment.newInstance(position + 1));
+                break;
+        }
+        ft.commit();
     }
 
     public void onSectionAttached(int number) {
